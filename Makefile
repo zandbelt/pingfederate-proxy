@@ -1,6 +1,8 @@
-all: clean proxy.zip
+VERSION= 3.2
 
-proxy.zip: proxy.war
+all: clean proxy-$(VERSION).zip
+
+proxy-$(VERSION).zip: proxy.war
 	zip -r $@ README $<
 	rm -rf proxy.war
 
@@ -13,4 +15,4 @@ proxy.war:
 	cp WebContent/index.jsp proxy.war/
 
 clean:
-	rm -rf proxy.war proxy.zip
+	rm -rf proxy.war proxy-$(VERSION).zip
