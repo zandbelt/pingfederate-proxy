@@ -10,7 +10,7 @@ Installation
 
 2. install the Agentless Integration Kit 1.2
  
-3. copy the proxy.war directory in server/default/deploy (using cp -r)
+3. copy the proxy.war directory and the proxy.jar file in server/default/deploy (using cp -r)
 
 4. configure one IDP and one SP Reference ID adapter with the settings below
 

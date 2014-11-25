@@ -14,7 +14,7 @@ Steps to produce a working setup:
  2) remove server/default/deploy/pf-referenceid-adapter-1.0.jar, install the Agentless
     Integration Kit 1.2 (i.e. copy pf-referenceid-adapter-1.2.jar to server/default/deploy)
 
- 3) copy the proxy.war directory in server/default/deploy (using cp -r)
+ 3) copy the proxy.war directory and the proxy.jar file in server/default/deploy (using cp -r)
 
  4) drop the data.zip from this distribution (dist/data.zip) in server/default/data/drop-in-deployer
     instead of the one that comes with the Quickstart sample apps
