@@ -1,1 +1,6 @@
 /.project
+/bin/
+/lib/
+/*.zip
+/proxy.jar
+/.classpath

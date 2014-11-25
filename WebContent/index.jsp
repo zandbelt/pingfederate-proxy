@@ -28,7 +28,7 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
- * @Version: 3.2
+ * @Version: 3.3
  *
  * @Author: Hans Zandbelt - hzandbelt@pingidentity.com
  *
@@ -44,6 +44,7 @@
 <%@page import="java.io.OutputStream"%>
 <%@page import="java.io.InputStreamReader"%>
 <%@page import="java.io.InputStream"%>
+<%@page import="java.io.Serializable"%>
 <%@page import="javax.net.ssl.HttpsURLConnection"%>
 <%@page import="java.net.URL"%>
 <%@page import="javax.servlet.http.Cookie"%>
@@ -58,30 +59,11 @@
 <%@page import="javax.net.ssl.SSLSession"%>
 <%@page import="javax.net.ssl.HostnameVerifier"%>
 <%@page import="org.sourceid.saml20.adapter.state.SessionStateSupport"%> 
+<%@page import="com.pingidentity.proxy.ProxySSOSessionState"%> 
 <%@page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%!
 
-static final String proxyVersion = "3.2";
-
-/**
-  * state (i.e. JSON identity attributes + timestamp that is stored in the session
-  */
-private static class ProxySSOSessionState {
-	private JSONObject jsonObject = null;
-	private Date timeStamp = null;
-	public ProxySSOSessionState(JSONObject json) {
-		this.jsonObject = json;
-		this.timeStamp = new Date();
-	}
-
-	public JSONObject getJSONObject() {
-		return this.jsonObject;
-	}
-
-	public Date getTimestamp() {
-		return this.timeStamp;
-	}
-}
+static final String proxyVersion = "3.3";
 
 /**
  * Execute a REST call to the Reference ID adapter.
