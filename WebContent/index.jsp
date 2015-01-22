@@ -1,6 +1,6 @@
 <%
 /***************************************************************************
- * Copyright (C) 2011-2013 Ping Identity Corporation
+ * Copyright (C) 2011-2015 Ping Identity Corporation
  * All rights reserved.
  *
  * The contents of this file are the property of Ping Identity Corporation.
@@ -28,7 +28,7 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
- * @Version: 3.3
+ * @Version: 3.4
  *
  * @Author: Hans Zandbelt - hzandbelt@pingidentity.com
  *
@@ -63,7 +63,7 @@
 <%@page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%!
 
-static final String proxyVersion = "3.3";
+static final String proxyVersion = "3.4";
 
 /**
  * Execute a REST call to the Reference ID adapter.
@@ -167,7 +167,7 @@ public void doResume(Properties p, String resumePath, HttpServletResponse respon
 			response.getWriter().write("<h3>Hans' Proxy JSP version " + proxyVersion + "</h3>");
 			response.getWriter().write("<p><i><small>(loaded " + p.size() + " properties)</small></i></p>");
 			response.getWriter().write("<p>Nothing to see here, please move along...</p>");
-			response.getWriter().write("<p>Documentation can be found <a href=\"https://pingfederate.googlecode.com/svn/trunk/proxy/WebContent/proxy-3.0.pdf\">here</a>.</p>");
+			response.getWriter().write("<p>Documentation can be found <a href=\"https://github.com/zandbelt/pingfederate-proxy-jsp/blob/master/proxy-3.0.pdf?raw=true\">here</a>.</p>");
 			response.getWriter().write("</body><html>");
 			response.getWriter().flush();
 			return;
