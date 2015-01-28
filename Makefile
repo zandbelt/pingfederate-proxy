@@ -3,7 +3,7 @@ VERSION= 3.4
 all: clean proxy-$(VERSION).zip
 
 proxy-$(VERSION).zip: proxy.war
-	zip -r $@ README proxy.jar $<
+	zip -r $@ README.md proxy.jar $<
 	rm -rf proxy.war
 
 proxy.war:
@@ -13,6 +13,7 @@ proxy.war:
 	cp WebContent/META-INF/MANIFEST.MF proxy.war/META-INF
 	cp WebContent/proxy.properties proxy.war/
 	cp WebContent/index.jsp proxy.war/
+	cp WebContent/dist/data.zip proxy.war/
 	jar cvf proxy.jar -C WebContent/WEB-INF/classes com
 
 clean:
