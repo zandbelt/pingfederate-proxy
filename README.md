@@ -1,7 +1,7 @@
-Hans' PingFederate Proxy JSP
-============================
+Hans' PingFederate Proxy
+========================
 
-This proxy is a Java Server Page (JSP) that allows bridging between connections in PingFederate.
+This proxy is a Java Servlet that allows bridging between connections in PingFederate.
 
 Installation
 ------------
@@ -21,8 +21,8 @@ Installation
    connections respectively that you want to bridge to/from
 
 7. review proxy.war/proxy.properties and edit as needed; typically only the hostname 
-   version 3.0 supports SSO sessions that are cached on the proxy for the duration
-   of the session.timeout setting
+   since version 3.0 SSO sessions on the proxy are supported, cached for the duration
+   of the `session.timeout setting`
 
 The proxy IDP adapter can be instantiated multiple times, inheriting from a single parent,
 to represent individual IDPs; the authentication service URL would then be extended with a

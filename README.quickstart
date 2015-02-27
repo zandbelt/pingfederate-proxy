@@ -2,7 +2,7 @@ THIS IS THE README FOR A SELF-CONTAINED QUICKSTART DEMO
 FOR A README WITH GENERIC INSTRUCTIONS SEE ONE FOLDER UP
 
 This code can be use in conjunction with the Quickstart Sample apps
-but the proxy JSP and properties file will work a generic proxy setup as well.
+but the proxy servlet and properties file will work a generic proxy setup as well.
 
 Steps to produce a working setup:
 
@@ -16,7 +16,7 @@ Steps to produce a working setup:
 
  3) copy the proxy.war directory and the proxy.jar file in server/default/deploy (using cp -r)
 
- 4) drop the data.zip from this distribution (dist/data.zip) in server/default/data/drop-in-deployer
+ 4) drop the data.zip from this distribution (./data.zip) in server/default/data/drop-in-deployer
     instead of the one that comes with the Quickstart sample apps
 
  5) modify your /etc/hosts file so that "proxy" resolves to "127.0.0.1" in addition
