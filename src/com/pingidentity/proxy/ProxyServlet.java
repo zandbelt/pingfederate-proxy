@@ -215,7 +215,7 @@ public class ProxyServlet extends HttpServlet {
 				response.getWriter().write("<html><body>");
 				response.getWriter().write("<title>Hans' Proxy</title>");
 				response.getWriter()
-						.write("<h3>Hans' Proxy JSP version " + proxyVersion
+						.write("<h3>Hans' Proxy - version " + proxyVersion
 								+ "</h3>");
 				response.getWriter().write(
 						"<p><i><small>(loaded " + p.size()
