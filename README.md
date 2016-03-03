@@ -3,8 +3,9 @@ Hans' PingFederate Proxy
 
 This proxy is a Java Servlet that allows bridging between connections in PingFederate.
 
-*Note: for most deployments it is now superseded by the native federation hub capabilities 
-that were introduced in PingFederate 7.3: http://documentation.pingidentity.com/display/PF73/Federation+Hub*
+*Note: this component is now superseded by the native federation hub capabilities 
+that were introduced in PingFederate 7.3: http://documentation.pingidentity.com/display/PF73/Federation+Hub
+and rolled-up and generalized in PingFederate 8.1 though the concept of Advanced Authentication Policies: https://documentation.pingidentity.com/pingfederate/pf81/index.shtml#adminGuide/concept/connectionMappingContracts.html*
 
 Installation
 ------------
