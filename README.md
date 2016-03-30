@@ -50,6 +50,10 @@ For the Agentless Adapter 1.2 use the POST Transport Mode for best security.
     Logout Mode	Front Channel
     Skip Host Name Validation	false
 
+For Agentless Adapter >= 1.2 leave the following entry empty:
+
+    Authentication Endpoint
+
 <and an attribute contract for all attributes you want to pass over the bridge>
 
 **IDP Proxy Adapter Settings**
@@ -68,3 +72,8 @@ For the Agentless Adapter 1.2 use the POST Transport Mode for best security.
     Skip Host Name Validation	false
 
 <and an attribute contract for all attributes you want to pass over the bridge>
+
+If you want to use different SP/IDP adapter pairs pointing to the same proxy.war instance but
+leveraging different property files (e.g. for different IDP/SP pairings), you can add a
+`props=<filename-without.suffix` parameter to the (cmd=) URLs in the configurations above and 
+put the properties file(s) in the proxy.war directory alongside of the default `proxy.properties`.

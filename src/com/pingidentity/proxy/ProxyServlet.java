@@ -1,7 +1,7 @@
 package com.pingidentity.proxy;
 
 /***************************************************************************
- * Copyright (C) 2011-2015 Ping Identity Corporation
+ * Copyright (C) 2011-2016 Ping Identity Corporation
  * All rights reserved.
  *
  * The contents of this file are the property of Ping Identity Corporation.
@@ -29,7 +29,7 @@ package com.pingidentity.proxy;
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
- * @Version: 4.0
+ * @Version: 4.1
  *
  * @Author: Hans Zandbelt - hzandbelt@pingidentity.com
  *
@@ -53,28 +53,40 @@ import org.sourceid.saml20.adapter.state.SessionStateSupport;
 public class ProxyServlet extends HttpServlet {
 
 	public class ProxySSOSessionState implements Serializable {
-		  
+
 		private static final long serialVersionUID = 7116471291112771141L;
-		
+
 		private JSONObject jsonObject = null;
-		private Date timeStamp = null;
+		private Date created = null;
+		private Date lastAccess = null;
+
 		public ProxySSOSessionState(JSONObject json) {
 			this.jsonObject = json;
-			this.timeStamp = new Date();
+			this.created = new Date();
+			this.lastAccess = new Date();
 		}
 
 		public JSONObject getJSONObject() {
 			return this.jsonObject;
 		}
 
-		public Date getTimestamp() {
-			return this.timeStamp;
+		public boolean isValid(long sessionTimeout, long sessionIdleTimeout) {
+			Date now = new Date();
+			if (now.after(new Date(this.created.getTime() + sessionTimeout
+					* 1000)))
+				return false;
+			if ((sessionIdleTimeout > 0)
+					&& (lastAccess.before(new Date(now.getTime()
+							- sessionIdleTimeout * 1000))))
+				return false;
+			this.lastAccess = now;
+			return true;
 		}
 	}
 
 	private static final long serialVersionUID = 7728776183597697066L;
 
-	static final String proxyVersion = "4.0";
+	static final String proxyVersion = "4.1";
 
 	/**
 	 * Execute a REST call to the Reference ID adapter.
@@ -196,17 +208,21 @@ public class ProxyServlet extends HttpServlet {
 	protected void doGet(HttpServletRequest request,
 			HttpServletResponse response) throws ServletException, IOException {
 		String cmdValue = request.getParameter("cmd");
+		String propsFileName = (request.getParameter("props") == null) ? "proxy"
+				: request.getParameter("props");
 
 		// for storing stuff in the session information that is shared in a
 		// cluster
 		SessionStateSupport sessionStateSupport = new SessionStateSupport();
 
 		InputStream stream = request.getServletContext().getResourceAsStream(
-				"/proxy.properties");
+				"/" + propsFileName + ".properties");
 		Properties p = new Properties();
 		p.load(stream);
-		long sessionTimeout = Long.valueOf(p
-				.getProperty("session.timeout", "0"));
+		long sessionExpiryTimeout = Long.valueOf(p.getProperty(
+				"session.timeout", "0"));
+		long sessionIdleTimeout = Long.valueOf(p.getProperty(
+				"session.idle.timeout", "0"));
 
 		if (cmdValue == null) {
 
@@ -214,9 +230,8 @@ public class ProxyServlet extends HttpServlet {
 				response.setStatus(HttpServletResponse.SC_OK);
 				response.getWriter().write("<html><body>");
 				response.getWriter().write("<title>Hans' Proxy</title>");
-				response.getWriter()
-						.write("<h3>Hans' Proxy - version " + proxyVersion
-								+ "</h3>");
+				response.getWriter().write(
+						"<h3>Hans' Proxy - version " + proxyVersion + "</h3>");
 				response.getWriter().write(
 						"<p><i><small>(loaded " + p.size()
 								+ " properties)</small></i></p>");
@@ -259,8 +274,7 @@ public class ProxyServlet extends HttpServlet {
 			ProxySSOSessionState state = (ProxySSOSessionState) sessionStateSupport
 					.getAttribute("state", request, response);
 			if ((state != null)
-					&& (new Date().before(new Date(state.getTimestamp()
-							.getTime() + sessionTimeout * 1000)))) {
+					&& (state.isValid(sessionExpiryTimeout, sessionIdleTimeout))) {
 
 				// continue IDP initiated SSO
 				doResume(
@@ -305,6 +319,11 @@ public class ProxyServlet extends HttpServlet {
 				targetResource += "?cmd=idp-sso-resume&resumePath="
 						+ URLEncoder.encode(request.getParameter("resumePath"),
 								"UTF-8");
+				if ((request.getParameter("props") != null)) {
+					targetResource += "&props="
+							+ URLEncoder.encode(request.getParameter("props"),
+									"UTF-8");
+				}
 				startSSOUrl += "&TargetResource="
 						+ URLEncoder.encode(targetResource, "UTF-8");
 				response.sendRedirect(startSSOUrl);
@@ -349,6 +368,11 @@ public class ProxyServlet extends HttpServlet {
 				targetResource += "&REF="
 						+ URLEncoder.encode(request.getParameter("REF"),
 								"UTF-8");
+				if ((request.getParameter("props") != null)) {
+					targetResource += "&props="
+							+ URLEncoder.encode(request.getParameter("props"),
+									"UTF-8");
+				}
 				startSLOUrl += "?TargetResource="
 						+ URLEncoder.encode(targetResource, "UTF-8");
 				response.sendRedirect(startSLOUrl);
@@ -387,6 +411,11 @@ public class ProxyServlet extends HttpServlet {
 				targetResource += "&REF="
 						+ URLEncoder.encode(request.getParameter("REF"),
 								"UTF-8");
+				if ((request.getParameter("props") != null)) {
+					targetResource += "&props="
+							+ URLEncoder.encode(request.getParameter("props"),
+									"UTF-8");
+				}
 				startSLOUrl += "&TargetResource="
 						+ URLEncoder.encode(targetResource, "UTF-8");
 				response.sendRedirect(startSLOUrl);
