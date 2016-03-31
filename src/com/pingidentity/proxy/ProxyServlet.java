@@ -29,7 +29,7 @@ package com.pingidentity.proxy;
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
- * @Version: 4.1
+ * @Version: 4.2
  *
  * @Author: Hans Zandbelt - hzandbelt@pingidentity.com
  *
@@ -86,7 +86,7 @@ public class ProxyServlet extends HttpServlet {
 
 	private static final long serialVersionUID = 7728776183597697066L;
 
-	static final String proxyVersion = "4.1";
+	static final String proxyVersion = "4.2";
 
 	/**
 	 * Execute a REST call to the Reference ID adapter.
@@ -273,6 +273,7 @@ public class ProxyServlet extends HttpServlet {
 
 			ProxySSOSessionState state = (ProxySSOSessionState) sessionStateSupport
 					.getAttribute("state", request, response);
+
 			if ((state != null)
 					&& (state.isValid(sessionExpiryTimeout, sessionIdleTimeout))) {
 
@@ -285,6 +286,34 @@ public class ProxyServlet extends HttpServlet {
 								sessionStateSupport));
 
 			} else {
+
+				if (state != null) {
+					sessionStateSupport.removeAttribute("state", request,
+							response);
+				}
+				
+				boolean allowInteraction = request
+						.getParameter("allowInteraction") != null ? Boolean
+						.parseBoolean(request.getParameter("allowInteraction"))
+						: true;
+
+				if ((sessionExpiryTimeout > 0) && (allowInteraction == false)) {
+					// create empty JSON object so login is required and PF will
+					// return an error to the caller
+					state = new ProxySSOSessionState(new JSONObject());
+					sessionStateSupport.setAttribute("state", state, request,
+							response, false);
+					doResume(
+							p,
+							request.getParameter("resumePath"),
+							response,
+							doDropoff(p, "idp", request, response,
+									sessionStateSupport));
+					sessionStateSupport.removeAttribute("state", request,
+							response);
+					return;
+				}
+
 				// this is an SP request to the IDP adapter that we forward to
 				// the IDP Discovery page for the SP adapter
 
