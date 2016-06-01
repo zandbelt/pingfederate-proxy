@@ -6,7 +6,7 @@ but the proxy servlet and properties file will work a generic proxy setup as wel
 
 Steps to produce a working setup:
 
- 1) download PingFederate 7.x and deploy it together with a license file
+ 1) download PingFederate 7.x/8.x and deploy it together with a license file
 
  2) download the quickstart sample apps and deploy according to the documentation
     but without deploying the included data.zip file

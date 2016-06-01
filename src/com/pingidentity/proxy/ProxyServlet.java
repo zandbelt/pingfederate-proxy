@@ -29,7 +29,7 @@ package com.pingidentity.proxy;
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
- * @Version: 4.2
+ * @Version: 4.3
  *
  * @Author: Hans Zandbelt - hzandbelt@pingidentity.com
  *
@@ -86,7 +86,7 @@ public class ProxyServlet extends HttpServlet {
 
 	private static final long serialVersionUID = 7728776183597697066L;
 
-	static final String proxyVersion = "4.2";
+	static final String proxyVersion = "4.3";
 
 	/**
 	 * Execute a REST call to the Reference ID adapter.
@@ -167,13 +167,29 @@ public class ProxyServlet extends HttpServlet {
 	}
 
 	/**
+	 * Get the base URL
+	 */
+	public String getBaseURL(Properties p, HttpServletRequest request, String propertyKey) {
+		if (propertyKey != null) {
+			if ((p.getProperty(propertyKey) != null)
+					&& (!p.getProperty(propertyKey).equals("")))
+				return p.getProperty(propertyKey);			
+		}		
+		if ((p.getProperty("pf.base.url") != null)
+				&& (!p.getProperty("pf.base.url").equals("")))
+			return p.getProperty("pf.base.url");
+		StringBuffer url = request.getRequestURL();
+		String ctx = request.getContextPath();
+		return url.substring(0, url.length() - ctx.length() - 1);
+	}
+	
+	/**
 	 * Pickup attributes from PingFederate using the Agentless protocol.
 	 */
 	public JSONObject doPickup(Properties p, String role,
 			HttpServletRequest request, HttpServletResponse response,
 			SessionStateSupport sessionStateSupport) throws IOException {
-		String pickupUrl = p.getProperty("pf.base.url")
-				+ "/ext/ref/pickup?REF="
+		String pickupUrl = getBaseURL(p, request, "pf.backchannel.url") + "/ext/ref/pickup?REF="
 				+ URLEncoder.encode(request.getParameter("REF"), "UTF-8");
 		JSONObject jsonObject = doREST(pickupUrl, p, role, null);
 		sessionStateSupport.setAttribute("state", new ProxySSOSessionState(
@@ -187,7 +203,7 @@ public class ProxyServlet extends HttpServlet {
 	public String doDropoff(Properties p, String role,
 			HttpServletRequest request, HttpServletResponse response,
 			SessionStateSupport sessionStateSupport) throws IOException {
-		String dropoffUrl = p.getProperty("pf.base.url") + "/ext/ref/dropoff";
+		String dropoffUrl = getBaseURL(p, request, "pf.backchannel.url") + "/ext/ref/dropoff";
 		ProxySSOSessionState state = (ProxySSOSessionState) sessionStateSupport
 				.getAttribute("state", request, response);
 		JSONObject jsonObject = doREST(dropoffUrl, p, role,
@@ -199,9 +215,10 @@ public class ProxyServlet extends HttpServlet {
 	 * send off the browser to the resumePath to PingFederate
 	 */
 	public void doResume(Properties p, String resumePath,
-			HttpServletResponse response, String ref) throws IOException {
-		String strReturnUrl = p.getProperty("pf.base.url") + resumePath
-				+ "?REF=" + URLEncoder.encode(ref, "UTF-8");
+			HttpServletRequest request, HttpServletResponse response, String ref)
+			throws IOException {
+		String strReturnUrl = getBaseURL(p, request, null) + resumePath + "?REF="
+				+ URLEncoder.encode(ref, "UTF-8");
 		response.sendRedirect(strReturnUrl);
 	}
 
@@ -247,7 +264,7 @@ public class ProxyServlet extends HttpServlet {
 			// start IDP-initiated-SSO
 			doPickup(p, "sp", request, response, sessionStateSupport);
 
-			String strReturnUrl = p.getProperty("pf.base.url");
+			String strReturnUrl = getBaseURL(p, request, null);
 			String idpAdapterId = (request.getParameter("IdpAdapterId") != null) ? request
 					.getParameter("IdpAdapterId") : p
 					.getProperty("idp.adapter.id");
@@ -281,6 +298,7 @@ public class ProxyServlet extends HttpServlet {
 				doResume(
 						p,
 						request.getParameter("resumePath"),
+						request,
 						response,
 						doDropoff(p, "idp", request, response,
 								sessionStateSupport));
@@ -291,7 +309,7 @@ public class ProxyServlet extends HttpServlet {
 					sessionStateSupport.removeAttribute("state", request,
 							response);
 				}
-				
+
 				boolean allowInteraction = request
 						.getParameter("allowInteraction") != null ? Boolean
 						.parseBoolean(request.getParameter("allowInteraction"))
@@ -306,6 +324,7 @@ public class ProxyServlet extends HttpServlet {
 					doResume(
 							p,
 							request.getParameter("resumePath"),
+							request,
 							response,
 							doDropoff(p, "idp", request, response,
 									sessionStateSupport));
@@ -318,7 +337,7 @@ public class ProxyServlet extends HttpServlet {
 				// the IDP Discovery page for the SP adapter
 
 				// assemble the URL to CDC endpoint and send the browser off
-				String startSSOUrl = p.getProperty("pf.base.url");
+				String startSSOUrl = getBaseURL(p, request, "pf.discovery.url");
 
 				startSSOUrl += (request.getParameter("startsso") != null) ? request
 						.getParameter("startsso") : p.getProperty(
@@ -343,7 +362,7 @@ public class ProxyServlet extends HttpServlet {
 									request.getParameter("PartnerIdpId"),
 									"UTF-8");
 				}
-				String targetResource = p.getProperty("pf.base.url")
+				String targetResource = getBaseURL(p, request, null)
 						+ p.getProperty("proxy.path");
 				targetResource += "?cmd=idp-sso-resume&resumePath="
 						+ URLEncoder.encode(request.getParameter("resumePath"),
@@ -364,7 +383,7 @@ public class ProxyServlet extends HttpServlet {
 			// to the SP through the IDP adapter
 
 			doPickup(p, "sp", request, response, sessionStateSupport);
-			doResume(p, request.getParameter("resumePath"), response,
+			doResume(p, request.getParameter("resumePath"), request, response,
 					doDropoff(p, "idp", request, response, sessionStateSupport));
 
 		} else if (cmdValue.equals("sp-slo")) {
@@ -378,8 +397,8 @@ public class ProxyServlet extends HttpServlet {
 				// SLO was already initiated by peer leg so just resume
 				sessionStateSupport.removeAttribute("dummy", request, response);
 				// send off the browser to the resumePath, ie. to the IDP
-				doResume(p, (String) jsonObj.get("resumePath"), response,
-						request.getParameter("REF"));
+				doResume(p, (String) jsonObj.get("resumePath"), request,
+						response, request.getParameter("REF"));
 
 			} else {
 
@@ -387,9 +406,9 @@ public class ProxyServlet extends HttpServlet {
 						response, false);
 				// assemble the URL to SLO endpoint and send the browser off to
 				// the SP through the IDP adapter
-				String startSLOUrl = p.getProperty("pf.base.url")
+				String startSLOUrl = getBaseURL(p, request, null)
 						+ "/idp/startSLO.ping";
-				String targetResource = p.getProperty("pf.base.url")
+				String targetResource = getBaseURL(p, request, null)
 						+ p.getProperty("proxy.path");
 				targetResource += "?cmd=slo-resume&resumePath="
 						+ URLEncoder.encode((String) jsonObj.get("resumePath"),
@@ -419,8 +438,8 @@ public class ProxyServlet extends HttpServlet {
 				// SLO was already initiated by peer leg so just resume
 				sessionStateSupport.removeAttribute("dummy", request, response);
 				// send off the browser to the resumePath, ie. to the SP
-				doResume(p, (String) jsonObj.get("resumePath"), response,
-						request.getParameter("REF"));
+				doResume(p, (String) jsonObj.get("resumePath"), request,
+						response, request.getParameter("REF"));
 
 			} else {
 
@@ -428,11 +447,11 @@ public class ProxyServlet extends HttpServlet {
 						response, false);
 				// assemble the URL to SLO endpoint and send the browser off to
 				// the IDP through the SP adapter
-				String startSLOUrl = p.getProperty("pf.base.url");
+				String startSLOUrl = getBaseURL(p, request, null);
 				startSLOUrl += "/sp/startSLO.ping?SpSessionAuthnAdapterId="
 						+ URLEncoder.encode(p.getProperty("sp.adapter.id"),
 								"UTF-8");
-				String targetResource = p.getProperty("pf.base.url")
+				String targetResource = getBaseURL(p, request, null)
 						+ p.getProperty("proxy.path");
 				targetResource += "?cmd=slo-resume&resumePath="
 						+ URLEncoder.encode((String) jsonObj.get("resumePath"),
@@ -456,7 +475,7 @@ public class ProxyServlet extends HttpServlet {
 			// kill the session and send off the browser to the resumePath, ie.
 			// to the IDP/SP
 			sessionStateSupport.removeAttribute("state", request, response);
-			doResume(p, request.getParameter("resumePath"), response,
+			doResume(p, request.getParameter("resumePath"), request, response,
 					request.getParameter("REF"));
 
 		} else {

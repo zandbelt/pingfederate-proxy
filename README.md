@@ -10,7 +10,7 @@ and rolled-up and generalized in PingFederate 8.1 though the concept of Advanced
 Installation
 ------------
 
-1. download PingFederate 7.x and deploy it together with a license file
+1. download PingFederate 7.x/8.x and deploy it together with a license file
 
 2. install the Agentless Integration Kit 1.2
  

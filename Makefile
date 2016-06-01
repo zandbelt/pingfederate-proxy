@@ -1,4 +1,4 @@
-VERSION=4.2
+VERSION=4.3
 
 all: clean proxy-$(VERSION).zip
 
