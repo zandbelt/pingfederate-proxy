@@ -100,44 +100,51 @@ public class ProxyServlet extends HttpServlet {
 
 		try {
 
-			if (Boolean.parseBoolean(p.getProperty(
-					"ssl.server.certificate.validation", "true")) != true) {
-				tm = new X509TrustManager() {
-					public void checkClientTrusted(X509Certificate[] x509Certs,
-							String s) throws CertificateException {
-					}
-
-					public void checkServerTrusted(X509Certificate[] x509Certs,
-							String s) throws CertificateException {
-					}
-
-					public X509Certificate[] getAcceptedIssuers() {
-						return new X509Certificate[0];
-					}
-				};
-				SSLContext sslContext = SSLContext.getInstance("TLS");
-				sslContext.init(null, new TrustManager[] { tm }, null);
-				socketFactory = sslContext.getSocketFactory();
-			}
-
 			URL u = new URL(url);
-			HttpsURLConnection con = (HttpsURLConnection) u.openConnection();
-
-			if (Boolean.parseBoolean(p.getProperty(
-					"ssl.server.certificate.validation", "true")) != true) {
-				con.setSSLSocketFactory(socketFactory);
-			}
-
-			if (Boolean.parseBoolean(p.getProperty("ssl.hostname.verification",
-					"true")) != true) {
-
-				hv = new HostnameVerifier() {
-					public boolean verify(String urlHostName, SSLSession session) {
-						return true;
-					}
-
-				};
-				con.setHostnameVerifier(hv);
+			URLConnection con = null;
+			
+			if (url.startsWith("https://")) {
+				
+				if (Boolean.parseBoolean(p.getProperty(
+						"ssl.server.certificate.validation", "true")) != true) {
+					tm = new X509TrustManager() {
+						public void checkClientTrusted(X509Certificate[] x509Certs,
+								String s) throws CertificateException {
+						}
+	
+						public void checkServerTrusted(X509Certificate[] x509Certs,
+								String s) throws CertificateException {
+						}
+	
+						public X509Certificate[] getAcceptedIssuers() {
+							return new X509Certificate[0];
+						}
+					};
+					SSLContext sslContext = SSLContext.getInstance("TLS");
+					sslContext.init(null, new TrustManager[] { tm }, null);
+					socketFactory = sslContext.getSocketFactory();
+				}
+			
+				con = u.openConnection();
+	
+				if (Boolean.parseBoolean(p.getProperty(
+						"ssl.server.certificate.validation", "true")) != true) {
+					((HttpsURLConnection)con).setSSLSocketFactory(socketFactory);
+				}
+	
+				if (Boolean.parseBoolean(p.getProperty("ssl.hostname.verification",
+						"true")) != true) {
+	
+					hv = new HostnameVerifier() {
+						public boolean verify(String urlHostName, SSLSession session) {
+							return true;
+						}
+	
+					};
+					((HttpsURLConnection)con).setHostnameVerifier(hv);
+				}
+			} else {
+				con = u.openConnection();				
 			}
 
 			con.setRequestProperty("ping.uname",
