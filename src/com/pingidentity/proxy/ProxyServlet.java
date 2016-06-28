@@ -29,7 +29,7 @@ package com.pingidentity.proxy;
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
- * @Version: 4.4
+ * @Version: 4.5
  *
  * @Author: Hans Zandbelt - hzandbelt@pingidentity.com
  *
@@ -432,17 +432,16 @@ public class ProxyServlet extends HttpServlet {
 			JSONObject jsonObj = doPickup(p, "sp", request, response,
 					sessionStateSupport);
 
-			if (sessionStateSupport.getAttribute("dummy", request, response) != null) {
+			if (sessionStateSupport.getAttribute("sp-dummy", request, response) != null) {
 
 				// SLO was already initiated by peer leg so just resume
-				sessionStateSupport.removeAttribute("dummy", request, response);
 				// send off the browser to the resumePath, ie. to the IDP
 				doResume(p, (String) jsonObj.get("resumePath"), request,
 						response, request.getParameter("REF"));
 
 			} else {
 
-				sessionStateSupport.setAttribute("dummy", "", request,
+				sessionStateSupport.setAttribute("sp-dummy", "", request,
 						response, false);
 				// assemble the URL to SLO endpoint and send the browser off to
 				// the SP through the IDP adapter
@@ -473,17 +472,16 @@ public class ProxyServlet extends HttpServlet {
 			JSONObject jsonObj = doPickup(p, "idp", request, response,
 					sessionStateSupport);
 
-			if (sessionStateSupport.getAttribute("dummy", request, response) != null) {
+			if (sessionStateSupport.getAttribute("idp-dummy", request, response) != null) {
 
 				// SLO was already initiated by peer leg so just resume
-				sessionStateSupport.removeAttribute("dummy", request, response);
 				// send off the browser to the resumePath, ie. to the SP
 				doResume(p, (String) jsonObj.get("resumePath"), request,
 						response, request.getParameter("REF"));
 
 			} else {
 
-				sessionStateSupport.setAttribute("dummy", "", request,
+				sessionStateSupport.setAttribute("idp-dummy", "", request,
 						response, false);
 				// assemble the URL to SLO endpoint and send the browser off to
 				// the IDP through the SP adapter
