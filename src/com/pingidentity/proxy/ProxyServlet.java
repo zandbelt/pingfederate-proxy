@@ -29,7 +29,7 @@ package com.pingidentity.proxy;
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
- * @Version: 4.3
+ * @Version: 4.4
  *
  * @Author: Hans Zandbelt - hzandbelt@pingidentity.com
  *
@@ -86,7 +86,7 @@ public class ProxyServlet extends HttpServlet {
 
 	private static final long serialVersionUID = 7728776183597697066L;
 
-	static final String proxyVersion = "4.3";
+	static final String proxyVersion = "4.4";
 
 	/**
 	 * Execute a REST call to the Reference ID adapter.
@@ -256,6 +256,25 @@ public class ProxyServlet extends HttpServlet {
 						"<p>Nothing to see here, please move along...</p>");
 				response.getWriter()
 						.write("<p>Documentation can be found <a href=\"https://github.com/zandbelt/pingfederate-proxy-jsp/blob/master/proxy-3.0.pdf?raw=true\">here</a>.</p>");
+
+				response.getWriter().write("<p><pre><table>");
+				Enumeration<String> headerNames = request.getHeaderNames();
+				while (headerNames.hasMoreElements()) {
+					response.getWriter().write("<tr><td>");
+					String headerName = headerNames.nextElement();
+					response.getWriter().write(headerName);
+					response.getWriter().write("</td><td>");
+					Enumeration<String> headers = request
+							.getHeaders(headerName);
+					while (headers.hasMoreElements()) {
+						String headerValue = headers.nextElement();
+						response.getWriter().write(headerValue);
+						response.getWriter().write("</td><td>");
+					}
+					response.getWriter().write("</td></tr>");
+				}
+				response.getWriter().write("</table></pre></p>");
+
 				response.getWriter().write("</body><html>");
 				response.getWriter().flush();
 				return;
@@ -286,6 +305,20 @@ public class ProxyServlet extends HttpServlet {
 
 			response.sendRedirect(strReturnUrl);
 
+		} else if (cmdValue.equals("check-sso")) {
+
+			ProxySSOSessionState state = (ProxySSOSessionState) sessionStateSupport
+					.getAttribute("state", request, response);
+
+			String result = ((state != null) && (state.isValid(
+					sessionExpiryTimeout, sessionIdleTimeout))) ? "yes" : "no";
+
+			String strReturnUrl = request.getParameter("return");
+			strReturnUrl += (strReturnUrl.indexOf("?") > -1) ? "&" : "?";
+			strReturnUrl += "check-sso=" + result;
+
+			response.sendRedirect(strReturnUrl);
+			
 		} else if (cmdValue.equals("idp-sso")) {
 
 			ProxySSOSessionState state = (ProxySSOSessionState) sessionStateSupport
