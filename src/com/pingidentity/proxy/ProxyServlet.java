@@ -29,7 +29,7 @@ package com.pingidentity.proxy;
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
- * @Version: 4.5
+ * @Version: 4.6
  *
  * @Author: Hans Zandbelt - hzandbelt@pingidentity.com
  *
@@ -86,7 +86,7 @@ public class ProxyServlet extends HttpServlet {
 
 	private static final long serialVersionUID = 7728776183597697066L;
 
-	static final String proxyVersion = "4.4";
+	static final String proxyVersion = "4.6";
 
 	/**
 	 * Execute a REST call to the Reference ID adapter.
@@ -290,6 +290,9 @@ public class ProxyServlet extends HttpServlet {
 			// start IDP-initiated-SSO
 			doPickup(p, "sp", request, response, sessionStateSupport);
 
+			sessionStateSupport.setAttribute("needs-slo", "", request,
+					response, false);
+			
 			String strReturnUrl = getBaseURL(p, request, null);
 			String idpAdapterId = (request.getParameter("IdpAdapterId") != null) ? request
 					.getParameter("IdpAdapterId") : p
@@ -421,7 +424,10 @@ public class ProxyServlet extends HttpServlet {
 		} else if (cmdValue.equals("idp-sso-resume")) {
 			// this is a response from the IDP to the SP adapter that we forward
 			// to the SP through the IDP adapter
-
+			
+			sessionStateSupport.setAttribute("needs-slo", "", request,
+					response, false);
+			
 			doPickup(p, "sp", request, response, sessionStateSupport);
 			doResume(p, request.getParameter("resumePath"), request, response,
 					doDropoff(p, "idp", request, response, sessionStateSupport));
@@ -432,7 +438,7 @@ public class ProxyServlet extends HttpServlet {
 			JSONObject jsonObj = doPickup(p, "sp", request, response,
 					sessionStateSupport);
 
-			if (sessionStateSupport.getAttribute("sp-dummy", request, response) != null) {
+			if (sessionStateSupport.getAttribute("needs-slo", request, response) == null ) {
 
 				// SLO was already initiated by peer leg so just resume
 				// send off the browser to the resumePath, ie. to the IDP
@@ -441,8 +447,8 @@ public class ProxyServlet extends HttpServlet {
 
 			} else {
 
-				sessionStateSupport.setAttribute("sp-dummy", "", request,
-						response, false);
+				sessionStateSupport.removeAttribute("needs-slo", request, response);
+
 				// assemble the URL to SLO endpoint and send the browser off to
 				// the SP through the IDP adapter
 				String startSLOUrl = getBaseURL(p, request, null)
@@ -472,8 +478,8 @@ public class ProxyServlet extends HttpServlet {
 			JSONObject jsonObj = doPickup(p, "idp", request, response,
 					sessionStateSupport);
 
-			if (sessionStateSupport.getAttribute("idp-dummy", request, response) != null) {
-
+			if (sessionStateSupport.getAttribute("needs-slo", request, response) == null ) {
+				
 				// SLO was already initiated by peer leg so just resume
 				// send off the browser to the resumePath, ie. to the SP
 				doResume(p, (String) jsonObj.get("resumePath"), request,
@@ -481,8 +487,8 @@ public class ProxyServlet extends HttpServlet {
 
 			} else {
 
-				sessionStateSupport.setAttribute("idp-dummy", "", request,
-						response, false);
+				sessionStateSupport.removeAttribute("needs-slo", request, response);
+				
 				// assemble the URL to SLO endpoint and send the browser off to
 				// the IDP through the SP adapter
 				String startSLOUrl = getBaseURL(p, request, null);
