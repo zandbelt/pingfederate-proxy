@@ -29,7 +29,7 @@ package com.pingidentity.proxy;
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
- * @Version: 4.8
+ * @Version: 4.9
  *
  * @Author: Hans Zandbelt - hzandbelt@pingidentity.com
  *
@@ -87,7 +87,7 @@ public class ProxyServlet extends HttpServlet {
 
 	private static final long serialVersionUID = 7728776183597697066L;
 
-	static final String proxyVersion = "4.8";
+	static final String proxyVersion = "4.9";
 
 	/**
 	 * Execute a REST call to the Reference ID adapter.
@@ -332,6 +332,12 @@ public class ProxyServlet extends HttpServlet {
 
 			response.sendRedirect(strReturnUrl);
 			
+		} else if (cmdValue.equals("idp-set-cookie")) {
+
+			Cookie cookie = new Cookie(p.getProperty("idp.cookie.name") , request.getParameter("PartnerIdpId"));
+			cookie.setPath("/");
+			response.addCookie(cookie);
+
 		} else if (cmdValue.equals("idp-sso")) {
 
 			ProxySSOSessionState state = (ProxySSOSessionState) sessionStateSupport
