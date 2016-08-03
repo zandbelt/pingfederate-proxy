@@ -29,7 +29,7 @@ package com.pingidentity.proxy;
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
- * @Version: 4.7
+ * @Version: 4.8
  *
  * @Author: Hans Zandbelt - hzandbelt@pingidentity.com
  *
@@ -87,7 +87,7 @@ public class ProxyServlet extends HttpServlet {
 
 	private static final long serialVersionUID = 7728776183597697066L;
 
-	static final String proxyVersion = "4.7";
+	static final String proxyVersion = "4.8";
 
 	/**
 	 * Execute a REST call to the Reference ID adapter.
@@ -412,6 +412,21 @@ public class ProxyServlet extends HttpServlet {
 							+ URLEncoder.encode(
 									request.getParameter("PartnerIdpId"),
 									"UTF-8");
+				} else if (p.getProperty("idp.cookie.name") != null) {
+					Cookie[] cookies = request.getCookies();
+					if (cookies != null) {
+						for (Cookie cookie : cookies) {
+							if (cookie.getName().equals(p.getProperty("idp.cookie.name"))) {
+								startSSOUrl += "&PartnerIdpId=" + URLEncoder.encode(cookie.getValue(), "UTF-8");
+								if (Boolean.parseBoolean(p.getProperty("idp.cookie.clean", "true")) == true) {
+									cookie.setValue("");
+									cookie.setPath("/");
+									cookie.setMaxAge(0);
+									response.addCookie(cookie);
+								}
+							}
+						}
+					}
 				}
 				String targetResource = getBaseURL(p, request, null)
 						+ p.getProperty("proxy.path");
