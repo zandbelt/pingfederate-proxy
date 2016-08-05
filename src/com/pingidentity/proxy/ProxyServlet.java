@@ -29,7 +29,7 @@ package com.pingidentity.proxy;
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
- * @Version: 4.9
+ * @Version: 4.10
  *
  * @Author: Hans Zandbelt - hzandbelt@pingidentity.com
  *
@@ -72,6 +72,7 @@ public class ProxyServlet extends HttpServlet {
 		}
 
 		public boolean isValid(long sessionTimeout, long sessionIdleTimeout) {
+			if ((this.jsonObject == null) || (this.jsonObject.size() == 0)) return false;
 			Date now = new Date();
 			if (now.after(new Date(this.created.getTime() + sessionTimeout
 					* 1000)))
@@ -87,7 +88,7 @@ public class ProxyServlet extends HttpServlet {
 
 	private static final long serialVersionUID = 7728776183597697066L;
 
-	static final String proxyVersion = "4.9";
+	static final String proxyVersion = "4.10";
 
 	/**
 	 * Execute a REST call to the Reference ID adapter.
